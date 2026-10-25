@@ -5,3 +5,6 @@
 //  Created by Роман Пичугин on 25.10.2026.
 //
 
+enum NetworkError: Error {
+    case errorOne
+}
