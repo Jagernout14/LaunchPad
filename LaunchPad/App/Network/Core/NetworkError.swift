@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum NetworkError: Error {
+nonisolated enum NetworkError: Error {
     case badURL
     case transport(Error)
     case clientError(Int)
@@ -72,13 +72,6 @@ enum NetworkError: Error {
             return !isCancelled
         case .serverError:
             return true
-        case .clientError(let code):
-            if code == 429 {
-                return true
-            } else {
-                return false
-            }
-            
         default:
             return false
         }

@@ -7,11 +7,19 @@
 
 import Foundation
 
-protocol NetworkClientProtocol {
+nonisolated protocol NetworkClientProtocol {
     func request<T: Decodable>(_ endpoint: Endpoint) async throws -> T
 }
 
-final class NetworkClient: NetworkClientProtocol {
+nonisolated final class NetworkClient: NetworkClientProtocol {
+    private let session: URLSession
+    private let decoder: JSONDecoder
+    
+    init(session: URLSession = .shared, decoder: JSONDecoder = .init()) {
+        self.session = session
+        self.decoder = decoder
+    }
+    
     func request<T: Decodable>(_ endpoint: Endpoint) async throws -> T {
         let request = try endpoint.makeRequest()
         
@@ -19,7 +27,7 @@ final class NetworkClient: NetworkClientProtocol {
         let response: URLResponse
         
         do {
-            (data, response) = try await URLSession.shared.data(for: request)
+            (data, response) = try await session.data(for: request)
         } catch {
             throw NetworkError.transport(error)
         }
@@ -33,6 +41,8 @@ final class NetworkClient: NetworkClientProtocol {
             break
         case 401:
             throw NetworkError.authProblem
+        case 429:
+            throw NetworkError.limitRequest
         case 400...499:
             throw NetworkError.clientError(httpResponse.statusCode)
         case 500...599:
@@ -42,7 +52,7 @@ final class NetworkClient: NetworkClientProtocol {
         }
         
         do {
-            return try JSONDecoder().decode(T.self, from: data)
+            return try decoder.decode(T.self, from: data)
         } catch {
             throw NetworkError.decoding(error)
         }
