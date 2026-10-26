@@ -24,13 +24,12 @@ nonisolated extension Endpoint {
     
     func makeRequest() throws -> URLRequest {
         guard var components = URLComponents(string: baseURL + path) else {
-            throw NetworkError.errorOne
-            //TODO: - Написать нормальный энум с ошибками
+            throw NetworkError.badURL
         }
         
         components.queryItems = query
         guard let url = components.url else {
-            throw NetworkError.errorOne
+            throw NetworkError.badURL
         }
         
         var request = URLRequest(url: url)
@@ -47,7 +46,7 @@ nonisolated extension Endpoint {
                 request.httpBody = try JSONEncoder().encode(body)
                 request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             } catch {
-                throw NetworkError.errorOne
+                throw NetworkError.encodeError
             }
         }
         
