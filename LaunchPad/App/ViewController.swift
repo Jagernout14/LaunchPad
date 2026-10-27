@@ -9,31 +9,34 @@ import UIKit
 
 class ViewController: UIViewController {
     
+    private let service: LaunchServiceProtocol
+    
+    init(service: LaunchServiceProtocol) {
+        self.service = service
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        guard let url = Bundle.main.url(forResource: "upcoming", withExtension: "json") else {
-            print("Файл не найден")
-            return
+        Task {
+            do {
+                let response = try await service.fetchUpcoming(limit: 5, offset: 0)
+                print(response.results.count)
+                
+                for launch in response.results {
+                    print(launch.name, launch.net)
+                }
+            } catch {
+                print(error)
+            }
         }
         
-        do {
-            let data = try Data(contentsOf: url)
-            
-            let decoder = JSONDecoder()
-            decoder.keyDecodingStrategy = .convertFromSnakeCase
-            decoder.dateDecodingStrategy = .iso8601
-            
-            let response = try decoder.decode(LaunchResponse.self, from: data)
-            
-            print("Запусков:", response.results.count)
-            
-            guard let first = response.results.first else { return }
-            print("Ракета:", first.rocket.configuration.name)
-            print("Миссия:", first.mission?.name ?? "нет миссии")
-            print("Старт:", first.net)
-        } catch {
-            print(error)
-        }
+        
     }
 }
