@@ -12,14 +12,17 @@ nonisolated protocol NetworkClientProtocol {
 }
 
 nonisolated final class NetworkClient: NetworkClientProtocol {
+    //MARK: - Private Properties
     private let session: URLSession
     private let decoder: JSONDecoder
     
+    //MARK: - Initializers
     init(session: URLSession = .shared, decoder: JSONDecoder = .init()) {
         self.session = session
         self.decoder = decoder
     }
     
+    //MARK: - Public methods
     func request<T: Decodable>(_ endpoint: Endpoint) async throws -> T {
         let request = try endpoint.makeRequest()
         
