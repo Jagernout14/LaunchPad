@@ -13,6 +13,7 @@ nonisolated struct LaunchResponse: Codable {
 }
 
 nonisolated struct Launch: Codable {
+    let name: String
     let id: String
     let net: Date
     let windowStart: Date
